@@ -171,27 +171,33 @@ class TCDDBiletKontrol:
                 alan.send_keys(Keys.BACKSPACE)
                 alan.send_keys(istasyon_adi.split(" (")[0])
 
+                
                 def uygun_istasyon(driver):
                     secenekler = driver.find_elements(
                         By.CSS_SELECTOR,
                         "button.dropdown-item.station"
                     )
 
+                    aranan = istasyon_adi.split(" (")[0].strip().casefold()
+
                     for secenek in secenekler:
                         if secenek.is_displayed():
-                            metin = secenek.text.strip()
-                            if istasyon_adi.casefold() in metin.casefold():
+                            metin = secenek.text.strip().casefold()
+                            if aranan in metin:
                                 return secenek
 
                     return False
 
+
                 secenek = WebDriverWait(self.driver, 15).until(
                     uygun_istasyon
                 )
-
+                                
                 self.driver.execute_script(
                     "arguments[0].click();", secenek
                 )
+                print(f"İstasyon seçildi: {istasyon_adi}")
+                return True
 
                 
             except Exception as e:
