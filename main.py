@@ -207,14 +207,7 @@ class TCDDBiletKontrol:
             f"İstasyon seçilemedi: {istasyon_adi}"
         ) from son_hata
 
-                    f"İstasyon seçimi denemesi "
-                    f"{deneme}/3 başarısız: {e}"
-                )
-                time.sleep(2)
-
-        raise RuntimeError(
-            f"İstasyon seçilemedi: {istasyon_adi}"
-        ) from son_hata
+                    
 
 
     def sefer_bilgilerini_al(self):
