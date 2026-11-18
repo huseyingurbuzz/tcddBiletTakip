@@ -129,47 +129,79 @@ class TCDDBiletKontrol:
                     time.sleep(bekleme)
         raise son_hata
 
+    
     def istasyon_sec(self, input_id, istasyon_adi):
         son_hata = None
+
         for deneme in range(1, 3):
             try:
-                istasyon_input = WebDriverWait(self.driver, 8).until(
+                istasyon_input = WebDriverWait(
+                    self.driver, 8
+                ).until(
                     EC.element_to_be_clickable((By.ID, input_id))
                 )
-                self.driver.execute_script("arguments[0].click();", istasyon_input)
-                
-self.driver.execute_script("""
-    const input = arguments[0];
-    const value = arguments[1];
-    const setter = Object.getOwnPropertyDescriptor(
-        HTMLInputElement.prototype, 'value'
-    ).set;
-    setter.call(input, value);
-    input.dispatchEvent(new Event('input', {bubbles: true}));
-    input.dispatchEvent(new Event('change', {bubbles: true}));
-""", istasyon_input, istasyon_adi)
 
+                self.driver.execute_script(
+                    "arguments[0].click();",
+                    istasyon_input
+                )
+
+                self.driver.execute_script("""
+                    const input = arguments[0];
+                    const value = arguments[1];
+                    const setter =
+                        Object.getOwnPropertyDescriptor(
+                            HTMLInputElement.prototype,
+                            'value'
+                        ).set;
+                    setter.call(input, value);
+                    input.dispatchEvent(
+                        new Event('input', {bubbles: true})
+                    );
+                    input.dispatchEvent(
+                        new Event('change', {bubbles: true})
+                    );
+                """, istasyon_input, istasyon_adi)
 
                 WebDriverWait(self.driver, 8).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "button.dropdown-item.station"))
+                    EC.presence_of_element_located((
+                        By.CSS_SELECTOR,
+                        "button.dropdown-item.station"
+                    ))
                 )
-                istasyon_butonlari = self.driver.find_elements(By.CSS_SELECTOR, "button.dropdown-item.station")
+
+                istasyon_butonlari = self.driver.find_elements(
+                    By.CSS_SELECTOR,
+                    "button.dropdown-item.station"
+                )
 
                 for buton in istasyon_butonlari:
-                    istasyon_text = buton.find_element(By.CLASS_NAME, "textLocation").text
+                    istasyon_text = buton.find_element(
+                        By.CLASS_NAME, "textLocation"
+                    ).text
+
                     if istasyon_adi in istasyon_text:
-                        self.driver.execute_script("arguments[0].click();", buton)
+                        self.driver.execute_script(
+                            "arguments[0].click();", buton
+                        )
                         return True
 
-                son_hata = Exception(f"'{istasyon_adi}' istasyonu bulunamadı!")
+                son_hata = Exception(
+                    f"'{istasyon_adi}' istasyonu bulunamadı!"
+                )
+
             except Exception as e:
                 son_hata = e
 
-            print(f"İstasyon seçim yeniden deneniyor ({deneme}/2): {input_id} -> {istasyon_adi}")
+            print(
+                f"İstasyon seçimi yeniden deneniyor "
+                f"({deneme}/2): {input_id} -> {istasyon_adi}"
+            )
             time.sleep(0.8)
 
-        print(f"İstasyon seçiminde hata: {str(son_hata)}")
+        print(f"İstasyon seçiminde hata: {son_hata}")
         raise son_hata
+
 
     def sefer_bilgilerini_al(self):
         try:
