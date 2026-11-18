@@ -192,14 +192,21 @@ class TCDDBiletKontrol:
                     "arguments[0].click();", secenek
                 )
 
-                print(f"İstasyon seçildi: {istasyon_adi}")
-                return True
-
+                
             except Exception as e:
                 son_hata = e
-                    print(f"HATA TÜRÜ: {type(e).__name__}")
-    print(f"AKTİF URL: {self.driver.current_url}")
+                print(f"HATA TÜRÜ: {type(e).__name__}")
+                print(f"AKTİF URL: {self.driver.current_url}")
                 print(
+                    f"İstasyon seçimi denemesi "
+                    f"{deneme}/3 başarısız: {e}"
+                )
+                time.sleep(2)
+
+        raise RuntimeError(
+            f"İstasyon seçilemedi: {istasyon_adi}"
+        ) from son_hata
+
                     f"İstasyon seçimi denemesi "
                     f"{deneme}/3 başarısız: {e}"
                 )
