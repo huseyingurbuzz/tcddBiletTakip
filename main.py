@@ -137,11 +137,18 @@ class TCDDBiletKontrol:
                     EC.element_to_be_clickable((By.ID, input_id))
                 )
                 self.driver.execute_script("arguments[0].click();", istasyon_input)
-                istasyon_input.send_keys(Keys.CONTROL, "a")
-                istasyon_input.send_keys(Keys.COMMAND, "a")
-                istasyon_input.send_keys(Keys.DELETE)
-                istasyon_input.send_keys(istasyon_adi)
-                time.sleep(0.4)
+                
+self.driver.execute_script("""
+    const input = arguments[0];
+    const value = arguments[1];
+    const setter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype, 'value'
+    ).set;
+    setter.call(input, value);
+    input.dispatchEvent(new Event('input', {bubbles: true}));
+    input.dispatchEvent(new Event('change', {bubbles: true}));
+""", istasyon_input, istasyon_adi)
+
 
                 WebDriverWait(self.driver, 8).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "button.dropdown-item.station"))
