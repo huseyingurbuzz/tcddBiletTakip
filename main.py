@@ -197,6 +197,8 @@ class TCDDBiletKontrol:
 
             except Exception as e:
                 son_hata = e
+                    print(f"HATA TÜRÜ: {type(e).__name__}")
+    print(f"AKTİF URL: {self.driver.current_url}")
                 print(
                     f"İstasyon seçimi denemesi "
                     f"{deneme}/3 başarısız: {e}"
