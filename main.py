@@ -168,7 +168,7 @@ class TCDDBiletKontrol:
 
                 alan.send_keys(Keys.CONTROL, "a")
                 alan.send_keys(Keys.BACKSPACE)
-                alan.send_keys(istasyon_adi)
+                alan.send_keys(istasyon_adi.split(" (")[0])
 
                 def uygun_istasyon(driver):
                     secenekler = driver.find_elements(
