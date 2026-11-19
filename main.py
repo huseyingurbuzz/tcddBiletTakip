@@ -83,7 +83,7 @@ class TCDDBiletKontrol:
         self.options = webdriver.ChromeOptions()
         self.options.binary_location = self.CHROMIUM_PATH
         self.options.add_argument('--headless=new')
-        self.options.add_argument('--window-size=1920,1080')
+        self.options.add_argument('--window-size=1280,720')
         self.options.add_argument('--disable-gpu')
         self.options.add_argument('--enable-javascript')
         self.options.add_argument('--no-sandbox')
