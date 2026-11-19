@@ -81,6 +81,8 @@ class TCDDBiletKontrol:
             '--disable-background-networking', '--disable-background-timer-throttling',
             '--disable-renderer-backgrounding', '--disable-features=Translate,MediaRouter',
             '--blink-settings=imagesEnabled=false', '--disk-cache-size=1',
+            '--disable-features=PaintHolding',
+            '--disable-site-isolation-trials',
             '--window-size=1280,720', '--disable-gpu', '--enable-javascript',
             '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
             '--disable-dev-tools', '--disable-extensions',
