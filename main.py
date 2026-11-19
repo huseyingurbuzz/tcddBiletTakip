@@ -530,18 +530,39 @@ def bilet_kontrol_kombinasyon(self, bilgiler):
                     f"Sefer sonucu henüz yüklenmedi ({deneme}/2): "
                     f"{nereden} - {nereye} | {tarih}"
                 )
-                try:
-                    self.sayfayi_sifirla()
-                    self.istasyon_sec("fromTrainInput", nereden)
-                    self.istasyon_sec("toTrainInput", nereye)
-                    if not self.tarih_sec(tarih):
-                        return None
-                    sefer_ara_button = WebDriverWait(self.driver, 5).until(
-                        EC.element_to_be_clickable((By.ID, "searchSeferButton"))
+        
+            try:
+                self.sayfayi_sifirla()
+                self.istasyon_sec("fromTrainInput", nereden)
+                self.istasyon_sec("toTrainInput", nereye)
+
+                if not self.tarih_sec(tarih):
+                    return None
+
+                sefer_ara_button = WebDriverWait(
+                    self.driver, 5
+                ).until(
+                    EC.element_to_be_clickable(
+                        (By.ID, "searchSeferButton")
                     )
-                except Exception as e:
-                    print(f"İkinci deneme hazırlığında hata: {type(e).__name__}: {e}")
-                    raise
+                )
+
+                self.driver.execute_script(
+                    "arguments[0].click();",
+                    sefer_ara_button
+                )
+
+                if self._sefer_sonuclarini_bekle(timeout=25):
+                    sefer_bulundu = True
+                    break
+
+            except Exception as e:
+                print(
+                    f"İkinci deneme hazırlığında hata: "
+                    f"{type(e).__name__}: {e}"
+                )
+                raise
+
             
             if not sefer_bulundu:
                 print(
