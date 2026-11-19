@@ -147,15 +147,15 @@ class TCDDBiletKontrol:
     
     
     
+    
     def istasyon_sec(self, input_id, istasyon_adi):
-        from selenium.webdriver.common.keys import Keys
         from selenium.common.exceptions import TimeoutException
 
         son_hata = None
+        aranan = istasyon_adi.split(" (")[0].strip()
 
         for deneme in range(1, 4):
             try:
-                # Sayfadaki yükleme katmanının kaybolmasını bekle
                 try:
                     WebDriverWait(self.driver, 15).until(
                         EC.invisibility_of_element_located(
@@ -166,26 +166,19 @@ class TCDDBiletKontrol:
                     print("Yükleme katmanı hâlâ görünüyor.")
 
                 alan = WebDriverWait(self.driver, 20).until(
-    EC.element_to_be_clickable((By.ID, input_id))
-)
+                    EC.presence_of_element_located(
+                        (By.ID, input_id)
+                    )
+                )
 
                 self.driver.execute_script(
                     "arguments[0].scrollIntoView({block:'center'});",
                     alan
                 )
 
-                            try:
-                alan = WebDriverWait(self.driver, 20).until(
-                    EC.presence_of_element_located((By.ID, input_id))
-                )
-
-                self.driver.execute_script(
-                    "arguments[0].scrollIntoView({block: 'center'});",
-                    alan
-                )
-
                 WebDriverWait(self.driver, 10).until(
-                    lambda d: alan.is_displayed() and alan.is_enabled()
+                    lambda d: alan.is_displayed()
+                    and alan.is_enabled()
                 )
 
                 self.driver.execute_script(
@@ -195,41 +188,36 @@ class TCDDBiletKontrol:
                 alan.click()
                 alan.send_keys(Keys.CONTROL, "a")
                 alan.send_keys(Keys.BACKSPACE)
-                alan.send_keys(istasyon_adi.split(" (")[0])
+                alan.send_keys(aranan)
 
-                
                 def uygun_istasyon(driver):
                     secenekler = driver.find_elements(
                         By.CSS_SELECTOR,
                         "button.dropdown-item.station"
                     )
 
-                    aranan = istasyon_adi.split(" (")[0].strip().casefold()
-
                     for secenek in secenekler:
                         if secenek.is_displayed():
                             metin = secenek.text.strip().casefold()
-                            if aranan in metin:
+                            if aranan.casefold() in metin:
                                 return secenek
 
                     return False
 
+                secenek = WebDriverWait(
+                    self.driver, 15
+                ).until(uygun_istasyon)
 
-                secenek = WebDriverWait(self.driver, 15).until(
-                    uygun_istasyon
-                )
-                                
                 self.driver.execute_script(
                     "arguments[0].click();", secenek
                 )
+
                 print(f"İstasyon seçildi: {istasyon_adi}")
                 return True
 
-                
             except Exception as e:
                 son_hata = e
                 print(f"HATA TÜRÜ: {type(e).__name__}")
-                print(f"AKTİF URL: {self.driver.current_url}")
                 print(
                     f"İstasyon seçimi denemesi "
                     f"{deneme}/3 başarısız: {e}"
@@ -239,9 +227,6 @@ class TCDDBiletKontrol:
         raise RuntimeError(
             f"İstasyon seçilemedi: {istasyon_adi}"
         ) from son_hata
-
-                    
-
 
     def sefer_bilgilerini_al(self):
         try:
