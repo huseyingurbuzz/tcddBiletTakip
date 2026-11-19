@@ -296,21 +296,33 @@ class TCDDBiletKontrol:
         return None
 
     def _sefer_sonuclarini_bekle(self, timeout=25):
-        print("SAYFA URL:", self.driver.current_url)
-        print("SAYFA BASLIGI:", self.driver.title)
-        guvenlik_metni = self.driver.find_element(By.TAG_NAME, "body").text
-        if "Güvenlik Doğrulaması" in guvenlik_metni or "doğrulamayı tamamlayın" in guvenlik_metni:
-            raise RuntimeError("TCDD güvenlik doğrulaması gerekli; sefer sonuçları kontrol edilemedi.")
-        print("SAYFA METNİ:", guvenlik_metni[:2000])
-        end_time = time.time() + timeout
-        while time.time() < end_time:
-            bulunan_seferler = self.driver.find_elements(
+        """Sonuçları bekle; güvenlik engelini sonuç yok diye yorumlama."""
+        end_time = time.monotonic() + timeout
+        last_body = ""
+        while time.monotonic() < end_time:
+            body = self.driver.find_element(By.TAG_NAME, "body").text
+            last_body = body
+            normalized = body.casefold()
+            if ("güvenlik doğrulaması" in normalized
+                    or "doğrulamayı tamamlayın" in normalized
+                    or "security verification" in normalized):
+                print("TANI URL:", self.driver.current_url, flush=True)
+                print("TANI BASLIK:", self.driver.title, flush=True)
+                print("TANI SAYFA METNI:", body[:1200], flush=True)
+                raise RuntimeError(
+                    "TCDD güvenlik doğrulaması istiyor. "
+                    "Railway oturumu sonuçları okuyamıyor; koltuk durumu bilinmiyor."
+                )
+            bulunan = self.driver.find_elements(
                 By.CSS_SELECTOR, "time[title^='Gidiş'], time[title^='Gidis']"
             )
-            print(f"Algılanan sefer elemanı sayısı: {len(bulunan_seferler)}")
-            if bulunan_seferler:
+            if bulunan:
+                print(f"Sefer elemanları bulundu: {len(bulunan)}", flush=True)
                 return True
             time.sleep(0.5)
+        print("TANI URL:", self.driver.current_url, flush=True)
+        print("TANI BASLIK:", self.driver.title, flush=True)
+        print("TANI SAYFA METNI:", last_body[:1200], flush=True)
         return False
 
     def seferleri_filtrele(self, sefer_bilgileri, saat_baslangic, saat_bitis, min_koltuk):
@@ -396,7 +408,12 @@ def run_checks(kombinasyonlar=None, send_notification=True):
             kontrol.sayfayi_sifirla()
             sonuc = kontrol.bilet_kontrol_kombinasyon(kombinasyon)
             if sonuc and sonuc.get("status") == "error":
-                errors.append(sonuc.get("reason", "unknown"))
+                reason = sonuc.get("reason", "unknown")
+                errors.append(reason)
+                print(f"KONTROL BASARISIZ: {reason}", flush=True)
+                if "güvenlik doğrulaması" in reason:
+                    print("Güvenlik doğrulaması nedeniyle diğer sorgular durduruldu.", flush=True)
+                    break
                 continue
             if sonuc and sonuc.get("status") == "found":
                 if send_notification:
@@ -461,6 +478,9 @@ def main():
             return
     except Exception as e:
         print(f"İlk deneme hata ile başarısız: {e}")
+    if result.get("message") and "güvenlik doğrulaması" in result["message"]:
+        print("TCDD doğrulaması gerekiyor; otomatik yeniden deneme yapılmayacak.")
+        raise SystemExit(2)
     print("5s bekleyip tekrar deneniyor...")
     time.sleep(5)
     result = run_checks(kombinasyonlar=kombinasyonlar, send_notification=send_notification)
