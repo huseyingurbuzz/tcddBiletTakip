@@ -97,7 +97,6 @@ class TCDDBiletKontrol:
         self.options.add_argument('--disable-dev-shm-usage')
         self.options.add_argument('--disable-dev-tools')
         self.options.add_argument('--disable-extensions')
-        self.options.add_argument('--no-zygote')
         self.options.add_argument('--user-data-dir=/tmp/chrome-user-data')
         self.options.add_argument('--data-path=/tmp/chrome-data')
         self.options.add_argument('--disk-cache-dir=/tmp/chrome-cache')
