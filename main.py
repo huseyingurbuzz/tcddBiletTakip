@@ -486,7 +486,7 @@ while time.time() < end_time:
 
 return False
 
-    def seferleri_filtrele(self, sefer_bilgileri, saat_baslangic, saat_bitis, min_koltuk):
+def seferleri_filtrele(self, sefer_bilgileri, saat_baslangic, saat_bitis, min_koltuk):
         bas = datetime.strptime(saat_baslangic, "%H:%M").time()
         bit = datetime.strptime(saat_bitis, "%H:%M").time()
         sonuc = []
