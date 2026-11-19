@@ -448,12 +448,28 @@ class TCDDBiletKontrol:
         print("SAYFA URL:", self.driver.current_url)
         print("SAYFA BASLIGI:", self.driver.title)
         
+        guvenlik_metni = self.driver.find_element(
+            By.TAG_NAME, "body"
+        ).text
+
+        if (
+            "Güvenlik Doğrulaması" in guvenlik_metni
+            or "doğrulamayı tamamlayın" in guvenlik_metni
+        ):
+            raise RuntimeError(
+                "TCDD güvenlik doğrulaması gerekli; sefer sonuçları kontrol edilemedi."
+            )
+
     
         guvenlik_metni = self.driver.find_element(By.TAG_NAME, "body").text
-        if "Güvenlik Doğrulaması" in guvenlik_metni:
-            print("UYARI: TCDD güvenlik doğrulaması görüntüleniyor.")
-        else:
-            print("Güvenlik doğrulaması metni bulunamadı.")
+
+if (
+    "Güvenlik Doğrulaması" in guvenlik_metni
+    or "doğrulamayı tamamlayın" in guvenlik_metni
+):
+    raise RuntimeError(
+        "TCDD güvenlik doğrulaması gerekli; sefer sonuçları kontrol edilemedi."
+    )
 
         print("SAYFA METNİ:", self.driver.find_element(By.TAG_NAME, "body").text[:2000])
         end_time = time.time() + timeout
@@ -522,12 +538,17 @@ class TCDDBiletKontrol:
                     sefer_ara_button = WebDriverWait(self.driver, 5).until(
                         EC.element_to_be_clickable((By.ID, "searchSeferButton"))
                     )
-                except Exception:
-                    pass
-
+                except Exception as e:
+                    print(f"İkinci deneme hazırlığında hata: {type(e).__name__}: {e}")
+                    raise
+            
             if not sefer_bulundu:
-                print(f"Sefer yok! {nereden} - {nereye} | {tarih}")
-                return {"status": "no_trip"}
+                print(
+                    f"Sefer sonuçları doğrulanamadı: "
+                    f"{nereden} - {nereye} | {tarih}"
+                )
+                return {"status": "error", "reason": "results_not_loaded"}
+
 
             sefer_bilgileri = self.sefer_bilgilerini_al()
             uygun_seferler = self.seferleri_filtrele(sefer_bilgileri, saat_baslangic, saat_bitis, min_koltuk)
