@@ -501,7 +501,7 @@ def seferleri_filtrele(self, sefer_bilgileri, saat_baslangic, saat_bitis, min_ko
                 sonuc.append(sefer)
         return sonuc
 
-    def bilet_kontrol_kombinasyon(self, bilgiler):
+def bilet_kontrol_kombinasyon(self, bilgiler):
         try:
             nereden = bilgiler["NEREDEN"]
             nereye = bilgiler["NEREYE"]
