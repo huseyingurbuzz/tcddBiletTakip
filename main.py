@@ -76,7 +76,7 @@ class TCDDBiletKontrol:
         self.options = webdriver.ChromeOptions()
         self.options.binary_location = self.CHROMIUM_PATH
         for arg in (
-            '--headless=new', '--renderer-process-limit=1',
+            '--headless=new'
             '--disable-software-rasterizer', '--disable-features=BackForwardCache',
             '--disable-background-networking', '--disable-background-timer-throttling',
             '--disable-renderer-backgrounding', '--disable-features=Translate,MediaRouter',
