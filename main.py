@@ -105,6 +105,7 @@ class TCDDBiletKontrol:
         son_hata = None
         for deneme in range(1, max_retries + 1):
             try:
+                self.driver.set_page_load_timeout(30)
                 self.driver.get("https://ebilet.tcddtasimacilik.gov.tr/view/eybis/tnmGenel/tcddWebContent.jsf")
                 WebDriverWait(self.driver, 15).until(
                     EC.presence_of_element_located((By.ID, "fromTrainInput"))
