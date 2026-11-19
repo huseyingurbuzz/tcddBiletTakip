@@ -83,6 +83,9 @@ class TCDDBiletKontrol:
         self.options = webdriver.ChromeOptions()
         self.options.binary_location = self.CHROMIUM_PATH
         self.options.add_argument('--headless=new')
+        self.options.add_argument('--renderer-process-limit=1')
+        self.options.add_argument('--disable-software-rasterizer')
+        self.options.add_argument('--disable-features=BackForwardCache')
         self.options.add_argument('--disable-background-networking')
         self.options.add_argument('--disable-background-timer-throttling')
         self.options.add_argument('--disable-renderer-backgrounding')
