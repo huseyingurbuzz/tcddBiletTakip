@@ -198,13 +198,14 @@ class TCDDBiletKontrol:
                     )
                 )
 
-                self.driver.execute_script(
-                    "arguments[0].click();", alan
-                )
+                self.driver.execute_script("""
+    const input = arguments[0];
+    input.focus();
+    input.value = '';
+    input.dispatchEvent(new Event('input', {bubbles: true}));
+""", alan)
 
-                alan.send_keys(Keys.CONTROL, "a")
-                alan.send_keys(Keys.BACKSPACE)
-                alan.send_keys(aranan)
+alan.send_keys(aranan)
 
                 def uygun_istasyon(driver):
                     secenekler = driver.find_elements(
