@@ -598,9 +598,11 @@ def bilet_kontrol_kombinasyon(self, bilgiler):
             print(f"Bir hata oluştu: {str(e)}")
             return {"status": "error"}
 
+    
     def kapat(self):
         if self.driver:
             self.driver.quit()
+
 
 def run_checks(kombinasyonlar=None, send_notification=True):
     if kombinasyonlar is None:
