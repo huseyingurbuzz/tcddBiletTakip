@@ -445,7 +445,11 @@ class TCDDBiletKontrol:
         """
         end_time = time.time() + timeout
         while time.time() < end_time:
-            bulunan_seferler = self.driver.find_elements(By.CSS_SELECTOR, "time[title^='Gidiş']")
+            bulunan_seferler = self.driver.find_elements(
+    By.CSS_SELECTOR,
+    "time[title^='Gidiş'], time[title^='Gidis']"
+            )
+            print(f"Algılanan sefer elemanı sayısı: {len(bulunan_seferler)}")
             if bulunan_seferler:
                 return True
             time.sleep(0.5)
