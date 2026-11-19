@@ -470,11 +470,11 @@ if (
     raise RuntimeError(
         "TCDD güvenlik doğrulaması gerekli; sefer sonuçları kontrol edilemedi."
     )
+    
+print("SAYFA METNİ:", self.driver.find_element(By.TAG_NAME, "body").text[:2000])
+end_time = time.time() + timeout
 
-        print("SAYFA METNİ:", self.driver.find_element(By.TAG_NAME, "body").text[:2000])
-        end_time = time.time() + timeout
-
-        while time.time() < end_time:
+while time.time() < end_time:
             bulunan_seferler = self.driver.find_elements(
                 By.CSS_SELECTOR,
                 "time[title^='Gidiş'], time[title^='Gidis']"
@@ -484,7 +484,7 @@ if (
                 return True
             time.sleep(0.5)
 
-        return False
+return False
 
     def seferleri_filtrele(self, sefer_bilgileri, saat_baslangic, saat_bitis, min_koltuk):
         bas = datetime.strptime(saat_baslangic, "%H:%M").time()
