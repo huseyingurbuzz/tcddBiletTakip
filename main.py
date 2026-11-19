@@ -423,7 +423,8 @@ class TCDDBiletKontrol:
                     if hucre.text.strip() == str(hedef_gun):
                         self.driver.execute_script("arguments[0].click();", hucre)
                         return True
-                except:
+                except Exception as e:
+                    print(f"Tarih hücresi kontrolünde hata: {e}")
                     continue
 
             raise Exception(f"{tarih} tarihi seçilemedi!")
@@ -513,7 +514,7 @@ def seferleri_filtrele(self, sefer_bilgileri, saat_baslangic, saat_bitis, min_ko
             self.istasyon_sec("toTrainInput", nereye)
             
             if not self.tarih_sec(tarih):
-                print(f"\nSefer yok! {nereden} - {nereye} için {tarih} tarihinde gidiş seferi bulunamadı.")
+                print(f"\nTarih seçilemedi! {tarih} için tarih seçimi başarısız oldu.")
                 return None
 
             sefer_ara_button = WebDriverWait(self.driver, 5).until(
