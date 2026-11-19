@@ -448,23 +448,26 @@ class TCDDBiletKontrol:
         print("SAYFA URL:", self.driver.current_url)
         print("SAYFA BASLIGI:", self.driver.title)
         
-    guvenlik_metni = self.driver.find_element(By.TAG_NAME, "body").text
-    if "Güvenlik Doğrulaması" in guvenlik_metni:
-        print("UYARI: TCDD güvenlik doğrulaması görüntüleniyor.")
-    else:
-        print("Güvenlik doğrulaması metni bulunamadı.")
+    
+        guvenlik_metni = self.driver.find_element(By.TAG_NAME, "body").text
+        if "Güvenlik Doğrulaması" in guvenlik_metni:
+            print("UYARI: TCDD güvenlik doğrulaması görüntüleniyor.")
+        else:
+            print("Güvenlik doğrulaması metni bulunamadı.")
 
-        print("SAYFA METNI:", self.driver.find_element(By.TAG_NAME, "body").text[:2000])
+        print("SAYFA METNİ:", self.driver.find_element(By.TAG_NAME, "body").text[:2000])
         end_time = time.time() + timeout
+
         while time.time() < end_time:
             bulunan_seferler = self.driver.find_elements(
-    By.CSS_SELECTOR,
-    "time[title^='Gidiş'], time[title^='Gidis']"
+                By.CSS_SELECTOR,
+                "time[title^='Gidiş'], time[title^='Gidis']"
             )
             print(f"Algılanan sefer elemanı sayısı: {len(bulunan_seferler)}")
             if bulunan_seferler:
                 return True
             time.sleep(0.5)
+
         return False
 
     def seferleri_filtrele(self, sefer_bilgileri, saat_baslangic, saat_bitis, min_koltuk):
