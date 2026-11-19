@@ -175,15 +175,28 @@ class TCDDBiletKontrol:
                 )
 
                 try:
-                    alan.click()
-                except Exception:
-                    self.driver.execute_script(
-                        "arguments[0].click();", alan
-                    )
+                    
+alan = WebDriverWait(self.driver, 20).until(
+    EC.presence_of_element_located((By.ID, input_id))
+)
 
-                alan.send_keys(Keys.CONTROL, "a")
-                alan.send_keys(Keys.BACKSPACE)
-                alan.send_keys(istasyon_adi.split(" (")[0])
+self.driver.execute_script(
+    "arguments[0].scrollIntoView({block: 'center'});",
+    alan
+)
+
+WebDriverWait(self.driver, 10).until(
+    lambda d: alan.is_displayed() and alan.is_enabled()
+)
+
+self.driver.execute_script(
+    "arguments[0].focus();", alan
+)
+
+alan.click()
+alan.send_keys(Keys.CONTROL, "a")
+alan.send_keys(Keys.BACKSPACE)
+alan.send_keys(istasyon_adi.split(" (")[0])
 
                 
                 def uygun_istasyon(driver):
