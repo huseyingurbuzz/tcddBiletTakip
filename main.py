@@ -89,7 +89,6 @@ class TCDDBiletKontrol:
         self.options.add_argument('--no-sandbox')
         self.options.add_argument('--disable-setuid-sandbox')
         self.options.add_argument('--disable-dev-shm-usage')
-        self.options.add_argument('--renderer-process-limit=1')
         self.options.add_argument('--disable-dev-tools')
         self.options.add_argument('--disable-extensions')
         self.options.add_argument('--no-zygote')
