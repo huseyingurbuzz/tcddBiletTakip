@@ -254,8 +254,10 @@ class TCDDBiletKontrol:
         try:
             # Wait longer for page to load completely
             WebDriverWait(self.driver, 20).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "time[title^='Gidiş']"))
-            )
+    EC.presence_of_element_located(
+        (By.CSS_SELECTOR, "time[title^='Gidiş'], time[title^='Gidis']")
+        )
+        )
 
             # Give extra time for all elements to render
             time.sleep(3)
