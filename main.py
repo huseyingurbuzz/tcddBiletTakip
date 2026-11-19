@@ -185,7 +185,17 @@ class TCDDBiletKontrol:
                     "arguments[0].focus();", alan
                 )
 
-                alan.click()
+                
+                WebDriverWait(self.driver, 30).until(
+                    EC.invisibility_of_element_located(
+                        (By.CSS_SELECTOR, ".vld-background")
+                    )
+                )
+
+                self.driver.execute_script(
+                    "arguments[0].click();", alan
+                )
+
                 alan.send_keys(Keys.CONTROL, "a")
                 alan.send_keys(Keys.BACKSPACE)
                 alan.send_keys(aranan)
