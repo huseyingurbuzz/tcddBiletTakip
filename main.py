@@ -121,13 +121,28 @@ class TCDDBiletKontrol:
                     EC.presence_of_element_located((By.ID, "fromTrainInput"))
                 )
                 return
+            
             except Exception as e:
                 son_hata = e
-                bekleme = 3 * (2 ** (deneme - 1))  # 3s, 6s, 12s
                 print(f"Sayfa yüklenemedi ({deneme}/{max_retries}): {e}")
+
+                if "tab crashed" in str(e).lower():
+                    print("Chrome sekmesi çöktü. Tarayıcı yeniden başlatılıyor.")
+                    try:
+                        self.driver.quit()
+                    except Exception:
+                        pass
+
+                    self.driver = webdriver.Chrome(
+                        service=self.service,
+                        options=self.options
+                    )
+
                 if deneme < max_retries:
+                    bekleme = 3 * (2 ** (deneme - 1))
                     print(f"{bekleme}s beklenip tekrar denenecek...")
                     time.sleep(bekleme)
+
         raise son_hata
 
     
