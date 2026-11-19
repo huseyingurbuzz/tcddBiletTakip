@@ -572,8 +572,14 @@ def bilet_kontrol_kombinasyon(self, bilgiler):
                 return {"status": "error", "reason": "results_not_loaded"}
 
 
+            
             sefer_bilgileri = self.sefer_bilgilerini_al()
-            uygun_seferler = self.seferleri_filtrele(sefer_bilgileri, saat_baslangic, saat_bitis, min_koltuk)
+            uygun_seferler = self.seferleri_filtrele(
+                sefer_bilgileri,
+                saat_baslangic,
+                saat_bitis,
+                min_koltuk
+            )
 
             if uygun_seferler:
                 return {
@@ -598,10 +604,10 @@ def bilet_kontrol_kombinasyon(self, bilgiler):
             print(f"Bir hata oluştu: {str(e)}")
             return {"status": "error"}
 
-    
     def kapat(self):
         if self.driver:
             self.driver.quit()
+
 
 
 def run_checks(kombinasyonlar=None, send_notification=True):
