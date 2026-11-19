@@ -445,6 +445,9 @@ class TCDDBiletKontrol:
         True: sefer elemanı bulundu
         False: timeout içinde sefer elemanı bulunamadı
         """
+        print("SAYFA URL:", self.driver.current_url)
+        print("SAYFA BASLIGI:", self.driver.title)
+        print("SAYFA METNI:", self.driver.find_element(By.TAG_NAME, "body").text[:2000])
         end_time = time.time() + timeout
         while time.time() < end_time:
             bulunan_seferler = self.driver.find_elements(
