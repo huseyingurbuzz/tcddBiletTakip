@@ -475,7 +475,8 @@ if (
 print("SAYFA METNİ:", self.driver.find_element(By.TAG_NAME, "body").text[:2000])
 end_time = time.time() + timeout
 
-while time.time() < end_time:
+
+        while time.time() < end_time:
             bulunan_seferler = self.driver.find_elements(
                 By.CSS_SELECTOR,
                 "time[title^='Gidiş'], time[title^='Gidis']"
@@ -485,23 +486,26 @@ while time.time() < end_time:
                 return True
             time.sleep(0.5)
 
-return False
+        return False
 
-def seferleri_filtrele(self, sefer_bilgileri, saat_baslangic, saat_bitis, min_koltuk):
+    def seferleri_filtrele(self, sefer_bilgileri, saat_baslangic, saat_bitis, min_koltuk):
         bas = datetime.strptime(saat_baslangic, "%H:%M").time()
         bit = datetime.strptime(saat_bitis, "%H:%M").time()
         sonuc = []
+
         for sefer in sefer_bilgileri:
             try:
                 saat = datetime.strptime(sefer["saat"], "%H:%M").time()
                 koltuk = int(sefer["bos_koltuk"])
-            except Exception:
+            except (ValueError, TypeError, KeyError):
                 continue
+
             if bas <= saat <= bit and koltuk >= min_koltuk:
                 sonuc.append(sefer)
+
         return sonuc
 
-def bilet_kontrol_kombinasyon(self, bilgiler):
+    def bilet_kontrol_kombinasyon(self, bilgiler):
         try:
             nereden = bilgiler["NEREDEN"]
             nereye = bilgiler["NEREYE"]
@@ -510,70 +514,64 @@ def bilet_kontrol_kombinasyon(self, bilgiler):
             saat_bitis = bilgiler["SAAT_BITIS"]
             min_koltuk = bilgiler["MIN_KOLTUK"]
 
-            self.istasyon_sec("fromTrainInput", nereden)
-            self.istasyon_sec("toTrainInput", nereye)
-            
-            if not self.tarih_sec(tarih):
-                print(f"\nTarih seçilemedi! {tarih} için tarih seçimi başarısız oldu.")
-                return None
-
-            sefer_ara_button = WebDriverWait(self.driver, 5).until(
-                EC.element_to_be_clickable((By.ID, "searchSeferButton"))
-            )
             sefer_bulundu = False
+
             for deneme in range(1, 3):
-                self.driver.execute_script("arguments[0].click();", sefer_ara_button)
-                if self._sefer_sonuclarini_bekle(timeout=25):
-                    sefer_bulundu = True
-                    break
-                print(
-                    f"Sefer sonucu henüz yüklenmedi ({deneme}/2): "
-                    f"{nereden} - {nereye} | {tarih}"
-                )
-        
-            try:
-                self.sayfayi_sifirla()
-                self.istasyon_sec("fromTrainInput", nereden)
-                self.istasyon_sec("toTrainInput", nereye)
+                try:
+                    if deneme > 1:
+                        print("İkinci arama deneniyor...")
+                        self.sayfayi_sifirla()
 
-                if not self.tarih_sec(tarih):
-                    return None
+                    self.istasyon_sec("fromTrainInput", nereden)
+                    self.istasyon_sec("toTrainInput", nereye)
 
-                sefer_ara_button = WebDriverWait(
-                    self.driver, 5
-                ).until(
-                    EC.element_to_be_clickable(
-                        (By.ID, "searchSeferButton")
+                    if not self.tarih_sec(tarih):
+                        print(f"Tarih seçilemedi: {tarih}")
+                        return {
+                            "status": "error",
+                            "reason": "date_selection_failed"
+                        }
+
+                    sefer_ara_button = WebDriverWait(
+                        self.driver, 10
+                    ).until(
+                        EC.element_to_be_clickable(
+                            (By.ID, "searchSeferButton")
+                        )
                     )
-                )
 
-                self.driver.execute_script(
-                    "arguments[0].click();",
-                    sefer_ara_button
-                )
+                    self.driver.execute_script(
+                        "arguments[0].click();",
+                        sefer_ara_button
+                    )
 
-                if self._sefer_sonuclarini_bekle(timeout=25):
-                    sefer_bulundu = True
-                    break
+                    if self._sefer_sonuclarini_bekle(timeout=25):
+                        sefer_bulundu = True
+                        break
 
-            except Exception as e:
-                print(
-                    f"İkinci deneme hazırlığında hata: "
-                    f"{type(e).__name__}: {e}"
-                )
-                raise
+                    print(
+                        f"Sefer sonuçları yüklenmedi ({deneme}/2): "
+                        f"{nereden} - {nereye} | {tarih}"
+                    )
 
-            
+                except Exception as e:
+                    print(
+                        f"Arama denemesi {deneme}/2 hata verdi: "
+                        f"{type(e).__name__}: {e}"
+                    )
+
             if not sefer_bulundu:
                 print(
                     f"Sefer sonuçları doğrulanamadı: "
                     f"{nereden} - {nereye} | {tarih}"
                 )
-                return {"status": "error", "reason": "results_not_loaded"}
+                return {
+                    "status": "error",
+                    "reason": "results_not_loaded"
+                }
 
-
-            
             sefer_bilgileri = self.sefer_bilgilerini_al()
+
             uygun_seferler = self.seferleri_filtrele(
                 sefer_bilgileri,
                 saat_baslangic,
@@ -593,15 +591,18 @@ def bilet_kontrol_kombinasyon(self, bilgiler):
                     "saat_bitis": saat_bitis,
                     "min_koltuk": min_koltuk,
                 }
-            else:
-                print(
-                    f"Koltuk yok! {nereden} - {nereye} | {tarih} "
-                    f"({saat_baslangic}-{saat_bitis}, >={min_koltuk})"
-                )
-                return {"status": "no_seat"}
+
+            print(
+                f"Koltuk yok! {nereden} - {nereye} | {tarih} "
+                f"({saat_baslangic}-{saat_bitis}, >={min_koltuk})"
+            )
+            return {"status": "no_seat"}
 
         except Exception as e:
-            print(f"Bir hata oluştu: {str(e)}")
+            print(
+                f"Bilet kontrol hatası: "
+                f"{type(e).__name__}: {e}"
+            )
             return {"status": "error"}
 
     def kapat(self):
@@ -609,12 +610,13 @@ def bilet_kontrol_kombinasyon(self, bilgiler):
             self.driver.quit()
 
 
-
 def run_checks(kombinasyonlar=None, send_notification=True):
     if kombinasyonlar is None:
         kombinasyonlar = arama_konfigurasyonlarini_oku()
     else:
-        kombinasyonlar = [_validate_config(k) for k in kombinasyonlar]
+        kombinasyonlar = [
+            _validate_config(k) for k in kombinasyonlar
+        ]
 
     if not kombinasyonlar:
         return {
@@ -626,17 +628,31 @@ def run_checks(kombinasyonlar=None, send_notification=True):
 
     kontrol = TCDDBiletKontrol()
     checked = 0
+    had_error = False
+
     try:
         kontrol.tarayici_baslat()
+
         for i, kombinasyon in enumerate(kombinasyonlar, start=1):
             checked += 1
+
             print(
                 f"\n[{i}/{len(kombinasyonlar)}] Kontrol: "
-                f"{kombinasyon['NEREDEN']} -> {kombinasyon['NEREYE']} | {kombinasyon['TARIH']}"
+                f"{kombinasyon['NEREDEN']} -> "
+                f"{kombinasyon['NEREYE']} | "
+                f"{kombinasyon['TARIH']}"
             )
+
             kontrol.sayfayi_sifirla()
-            sonuc = kontrol.bilet_kontrol_kombinasyon(kombinasyon)
-            if sonuc and sonuc.get("status") == "found":
+            sonuc = kontrol.bilet_kontrol_kombinasyon(
+                kombinasyon
+            )
+
+            if sonuc is None or sonuc.get("status") == "error":
+                had_error = True
+                continue
+
+            if sonuc.get("status") == "found":
                 if send_notification:
                     from sendTelegram import send_telegram_message
                     send_telegram_message(
@@ -648,6 +664,7 @@ def run_checks(kombinasyonlar=None, send_notification=True):
                         sonuc["saat_bitis"],
                         sonuc["min_koltuk"],
                     )
+
                 return {
                     "ok": True,
                     "checked": checked,
@@ -655,12 +672,17 @@ def run_checks(kombinasyonlar=None, send_notification=True):
                     "result": sonuc
                 }
 
-        print("\nHiçbir kombinasyonda uygun koltuk bulunamadı.")
+        if had_error:
+            print("\nBazı aramalar hata nedeniyle doğrulanamadı.")
+        else:
+            print("\nHiçbir kombinasyonda uygun koltuk bulunamadı.")
+
         return {
-            "ok": True,
+            "ok": not had_error,
             "checked": checked,
             "matched": False
         }
+
     finally:
         kontrol.kapat()
 
@@ -671,63 +693,93 @@ def _parse_bool_text(value):
 
 def _secili_kombinasyonlari_hazirla(combo_index):
     kombinasyonlar = arama_konfigurasyonlarini_oku()
+
     if combo_index is None:
         return kombinasyonlar
+
     if combo_index < 0 or combo_index >= len(kombinasyonlar):
         raise ValueError(
             f"Geçersiz COMBO_INDEX: {combo_index}. "
             f"Geçerli aralık: 0..{max(len(kombinasyonlar)-1, 0)}"
         )
+
     return [kombinasyonlar[combo_index]]
 
 
 def _argumanlari_oku():
     parser = argparse.ArgumentParser()
+
     parser.add_argument(
         "--combo-index",
         type=int,
         default=None,
-        help="Sadece belirli bir kombinasyonu çalıştırır (0 tabanlı indeks).",
+        help="Sadece belirli bir kombinasyonu çalıştırır.",
     )
+
     parser.add_argument(
         "--send-telegram",
         choices=["true", "false"],
         default=None,
         help="Telegram gönderimini zorlar (true/false).",
     )
+
     return parser.parse_args()
+
 
 def main():
     args = _argumanlari_oku()
 
     if args.send_telegram is not None:
-        send_notification = _parse_bool_text(args.send_telegram)
+        send_notification = _parse_bool_text(
+            args.send_telegram
+        )
     else:
-        send_notification = _parse_bool_text(os.getenv("SEND_TELEGRAM", "true"))
+        send_notification = _parse_bool_text(
+            os.getenv("SEND_TELEGRAM", "true")
+        )
 
     if args.combo_index is not None:
         combo_index = args.combo_index
     else:
         combo_env = os.getenv("COMBO_INDEX")
-        combo_index = int(combo_env) if combo_env not in (None, "") else None
+        combo_index = (
+            int(combo_env)
+            if combo_env not in (None, "")
+            else None
+        )
 
-    kombinasyonlar = _secili_kombinasyonlari_hazirla(combo_index)
+    kombinasyonlar = _secili_kombinasyonlari_hazirla(
+        combo_index
+    )
+
     if combo_index is not None:
-        print(f"Sadece COMBO_INDEX={combo_index} çalıştırılıyor.")
+        print(
+            f"Sadece COMBO_INDEX={combo_index} çalıştırılıyor."
+        )
 
     try:
-        result = run_checks(kombinasyonlar=kombinasyonlar, send_notification=send_notification)
+        result = run_checks(
+            kombinasyonlar=kombinasyonlar,
+            send_notification=send_notification
+        )
+
         if result.get("ok"):
             return
+
     except Exception as e:
         print(f"İlk deneme hata ile başarısız: {e}")
 
     print("5s bekleyip tekrar deneniyor...")
     time.sleep(5)
 
-    result = run_checks(kombinasyonlar=kombinasyonlar, send_notification=send_notification)
+    result = run_checks(
+        kombinasyonlar=kombinasyonlar,
+        send_notification=send_notification
+    )
+
     if not result.get("ok"):
         raise SystemExit(1)
+
 
 if __name__ == "__main__":
     main()
