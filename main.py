@@ -205,7 +205,10 @@ class TCDDBiletKontrol:
     input.dispatchEvent(new Event('input', {bubbles: true}));
 """, alan)
 
-alan.send_keys(aranan)
+
+                alan.send_keys(aranan)
+
+                
 
                 def uygun_istasyon(driver):
                     secenekler = driver.find_elements(
