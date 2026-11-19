@@ -447,6 +447,13 @@ class TCDDBiletKontrol:
         """
         print("SAYFA URL:", self.driver.current_url)
         print("SAYFA BASLIGI:", self.driver.title)
+        
+    guvenlik_metni = self.driver.find_element(By.TAG_NAME, "body").text
+    if "Güvenlik Doğrulaması" in guvenlik_metni:
+        print("UYARI: TCDD güvenlik doğrulaması görüntüleniyor.")
+    else:
+        print("Güvenlik doğrulaması metni bulunamadı.")
+
         print("SAYFA METNI:", self.driver.find_element(By.TAG_NAME, "body").text[:2000])
         end_time = time.time() + timeout
         while time.time() < end_time:
